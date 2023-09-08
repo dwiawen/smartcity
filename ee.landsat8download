@@ -1,0 +1,28 @@
+var shp = ee.FeatureCollection('projects/ee-dwiawen/assets/smg_cb')
+Map.addLayer(shp)
+
+var image = ee.ImageCollection('LANDSAT/LC08/C02/T1')
+    .filterDate('2020-01-01', '2020-12-31')
+    .filterBounds(shp)
+    .sort('CLOUD_COVER',false)
+    
+var image_number = image.size()
+print(image_number)
+
+var image_sort = ee.Image(image.sort('CLOUD_COVER').first())
+print(image_sort)
+
+var image_final = ee.Image('LANDSAT/LC08/C02/T1/LC08_120065_20200627')
+  .select(["B7","B6","B4"])
+//Map.addLayer(image_final)
+
+Map.addLayer(image_final.clip(shp))
+
+Export.image.toDrive({
+  image : image_final,
+  description : 'landsatsmg',
+  scale : 30,
+  region : shp,
+  folder : 'landsat',
+  fileFormat : 'GeoTIFF',
+  }) 
